@@ -15,48 +15,33 @@ Before diving into the machine learning pipeline, it's important to understand t
 - Reading and saving CSV files.
 - Exploring data from PAD projects.
 
-You can find the notebook here:  
-[**Python Basics for PAD Project Data Exploration**](notebooks/01_python_basics_and_introduction_to_pandas.ipynb)
+You can find the notebook here:  [**Python Basics for PAD Project Data Exploration**](https://colab.research.google.com/drive/1CWoDaFxGord3w60mJg7t2pufraqXhdH-)
 
-Open it in Google Colab:  
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/1CWoDaFxGord3w60mJg7t2pufraqXhdH-/view?usp=sharing)
+[![**Python Basics for PAD Project Data Exploration**](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1CWoDaFxGord3w60mJg7t2pufraqXhdH-)
 
 
 ## 2. Setting Up Your Environment in Google Colab
 
 To run the notebooks efficiently, we recommend using **Google Colab** along with **Google Drive** for storage. This environment allows you to utilize GPU/TPU resources for model training and manage data files directly from your Google Drive.
 
-1. **Open the Pre-configured Notebook**:  
-   Access the notebook by clicking the link below. This notebook will guide you through mounting Google Drive and setting up the necessary packages for the workflow.
+**Open the Pre-configured Notebook**:  
+Access the notebook by clicking the link below. This notebook will guide you through mounting Google Drive and setting up the necessary packages for the workflow.
    
-   You can find the notebook here:  
-[**Google Colab Initial Setup**](notebooks/02_google_colab_initial_setup.ipynb)
+You can find the notebook here: [**Google Colab Initial Setup**](https://colab.research.google.com/drive/1fsHOC4YHwLNRNn64ymHitD_iW6JPFiMh)
    
-   [Open the Colab Notebook](https://colab.research.google.com/drive/1fsHOC4YHwLNRNn64ymHitD_iW6JPFiMh?usp=sharing)
-   
-2. **Install Required Libraries**:  
-   The notebook includes cells to install required Python libraries like `pandas`, `tensorflow`, etc.
-   
-3. **Connect Google Drive**:  
-   Use the built-in Google Drive integration to store and manage your datasets and models.
+[![**Google Colab Initial Setup**](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1fsHOC4YHwLNRNn64ymHitD_iW6JPFiMh)
 
-5. **Connect Github repo to your Google Drive**:  
-   Clone the repository in your google drive   
-
-> **Note**: This setup with clone repo needs to be done once. After the initial setup, you can directly start running the subsequent notebooks given in that tutorial.
-
+   
 
 ## 3. Explore Data Available via PAD API
 
 The PAD API provides access to rich datasets that you can explore and prepare for machine learning tasks. The following notebooks will help you interact with the API, fetch data, and prepare it for machine learning workflows.
 
-### Notebooks for Data Exploration and Preparation:
+**Exploration Notebook**: Use this notebook to explore the available data via the PAD API. You can visualize and understand the structure of the data, analyze metadata, and assess data quality.
 
-- **Exploration Notebook**: Use this notebook to explore the available data via the PAD API. You can visualize and understand the structure of the data, analyze metadata, and assess data quality.
+You can find the notebook here: [**Exploration Notebook in Google Colab**](https://colab.research.google.com/drive/12ydoCcnnwWkyBQsO3LOe70ezCB9QuB-0) 
 
-  [**Exploration Notebook**](notebooks/03_pad_functions.ipynb)
-
-  [Open in Google Colab](https://drive.google.com/file/d/12ydoCcnnwWkyBQsO3LOe70ezCB9QuB-0/view?usp=sharing)
+[![**Exploration Notebook in Google Colab**](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/12ydoCcnnwWkyBQsO3LOe70ezCB9QuB-0)  
 
 
 ## 4. ML Pipeline Notebooks
