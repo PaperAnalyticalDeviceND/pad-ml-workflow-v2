@@ -19,6 +19,8 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 API_URL = "https://pad.crc.nd.edu/api/v2"
 
+MODEL_DATASET_MAPPING = './data/model_dataset_mapping.csv'
+
 def get_data_api(request_url, data_type=""):
     try:
         # fetch_data_from_api
@@ -849,3 +851,35 @@ def show_prediction(card_id, model_id):
 
     # Display the widget
     display(image_widget_box)
+
+def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
+  model_dataset_mapping =  pd.read_csv(mapping_file_path)
+  return model_dataset_mapping
+  
+def get_datasets(mapping_file_path = MODEL_DATASET_MAPPING):
+  mapping_df = get_model_dataset_mapping(mapping_file_path)
+  datasets_df = mapping_df.groupby(['Dataset Name', 'Training Dataset', 'Test Dataset'])['Model ID'].apply(list).reset_index()
+  return datasets_df
+
+def get_dataset_from_model_id(model_id, mapping_file_path = MODEL_DATASET_MAPPING):
+  model_dataset_mapping =  pd.read_csv(mapping_file_path)
+  model_dataset = model_dataset_mapping[model_dataset_mapping['Model ID'] == model_id]
+
+  #display(model_dataset)
+  if len(model_dataset) == 0:
+    print("No dataset found for this model")
+    return None
+  else:
+    # get Dataset dataframe
+    train_url = model_dataset[model_dataset['Model ID'] == model_id]['Training Dataset'].values[0]
+    train_df = pd.read_csv(train_url)
+    test_url = model_dataset[model_dataset['Model ID'] == model_id]['Test Dataset'].values[0]
+    test_df = pd.read_csv(test_url)
+
+    # combine train_df and test_df but make a column to identify if the row is train or test
+    train_df['is_train'] = 1
+    test_df['is_train'] = 0
+    data_df = pd.concat([train_df, test_df])
+    return data_df
+
+
