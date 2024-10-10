@@ -856,7 +856,7 @@ def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
   model_dataset_mapping =  pd.read_csv(mapping_file_path)
   return model_dataset_mapping
   
-def get_datasets(mapping_file_path = MODEL_DATASET_MAPPING):
+def get_dataset_list(mapping_file_path = MODEL_DATASET_MAPPING):
   mapping_df = get_model_dataset_mapping(mapping_file_path)
   datasets_df = mapping_df.groupby(['Dataset Name', 'Training Dataset', 'Test Dataset'])['Model ID'].apply(list).reset_index()
   return datasets_df
@@ -882,4 +882,23 @@ def get_dataset_from_model_id(model_id, mapping_file_path = MODEL_DATASET_MAPPIN
     data_df = pd.concat([train_df, test_df])
     return data_df
 
+def get_dataset(name):
 
+    df = get_dataset_list()
+    dataset = df[df['Dataset Name'] == name]
+  
+    if len(df) > 0:        
+        # get Dataset dataframe
+        train_url = dataset['Training Dataset'].values[0]
+        train_df = pd.read_csv(train_url)
+        test_url = dataset['Test Dataset'].values[0]
+        test_df = pd.read_csv(test_url)
+
+        # combine train_df and test_df but make a column to identify if the row is train or test
+        train_df['is_train'] = 1
+        test_df['is_train'] = 0
+        data_df = pd.concat([train_df, test_df])
+        return data_df
+    else:
+      print(f"Dataset with name {name} not found")
+      return None
