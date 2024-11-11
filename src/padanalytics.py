@@ -67,12 +67,26 @@ def get_projects():
     return projects
 
 # Extended function to get project cards for either a single project ID or multiple project IDs
-def get_project_cards(project_ids = None):
+def get_project_cards(project_name = None, project_ids = None):
+
+
+    def _get_project_cards_by_name(name):
+        project_id = get_project(name=project_name).id.values[0]
+        if project_id:
+            return _get_project_cards_by_id(project_id)
+        else:
+            print(f"Project {name} not found.")
+            return None
+                
 
     # Get project cards
-    def _get_project_cards(project_id):
+    def _get_project_cards_by_id(project_id):
         request_url = f"{API_URL}/projects/{project_id}/cards"
         return get_data_api(request_url, f"project {project_id} cards")
+
+    # check if project_name is not None
+    if project_name is not None:
+        return _get_project_cards_by_name(project_name)
 
     # Check if project_ids is None, covert it to a list of all available project
     if project_ids is None:
@@ -89,7 +103,7 @@ def get_project_cards(project_ids = None):
 
     for project_id in project_ids:
         # Get cards for each project
-        project_cards = _get_project_cards(project_id)
+        project_cards = _get_project_cards_by_id(project_id)
         
         if project_cards is not None:
             all_cards.append(project_cards)
