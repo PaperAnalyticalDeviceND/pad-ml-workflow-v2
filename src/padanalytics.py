@@ -397,10 +397,12 @@ def create_tabs(df, group_column, images_per_row=5):
     # Display the Output widget with the tabs inside
     display(output)
 
+    
 def show_grouped_cards(df, group_column, images_per_row=5):
-    # Add url to dataframe
-    df['url'] = df['processed_file_location'].apply(lambda x: f"https://pad.crc.nd.edu/{x}")
+    # Add url to dataframe safely
+    df.loc[:, 'url'] = df['processed_file_location'].apply(lambda x: f"https://pad.crc.nd.edu/{x}")
     create_tabs(df, group_column, images_per_row)
+    
 
 def create_thumbnail(url, size=(100, 100)):
     response = requests.get(url)
