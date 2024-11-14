@@ -896,7 +896,7 @@ def get_dataset_from_model_id(model_id, mapping_file_path = MODEL_DATASET_MAPPIN
 
 def get_dataset(name):
 
-    df = _get_dataset_list()
+    df = get_dataset_list()
     dataset = df[df['Dataset Name'] == name]
     
     if len(dataset) > 0:
