@@ -69,15 +69,13 @@ def get_projects():
 # Extended function to get project cards for either a single project ID or multiple project IDs
 def get_project_cards(project_name = None, project_ids = None):
 
-
     def _get_project_cards_by_name(name):
         project_id = get_project(name=project_name).id.values[0]
         if project_id:
             return _get_project_cards_by_id(project_id)
         else:
             print(f"Project {name} not found.")
-            return None
-                
+            return None                
 
     # Get project cards
     def _get_project_cards_by_id(project_id):
@@ -144,7 +142,6 @@ def get_project_by_name(project_name):
     project = projects[projects['project_name'].apply(lambda x: x.lower() == project_name.lower())]
     return project
 
-
 def get_project(id=None, name=None):
     if id:
         # Get project by ID
@@ -154,8 +151,6 @@ def get_project(id=None, name=None):
         return get_project_by_name(name)
     else:
         raise ValueError("You must provide either project_id or project_name")
-
-
 
 # Function to load image from URL
 def load_image_from_url(image_url):
@@ -875,8 +870,9 @@ def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
 def get_dataset_list(mapping_file_path = MODEL_DATASET_MAPPING):
   mapping_df = get_model_dataset_mapping(mapping_file_path)
   datasets_df = mapping_df.groupby(['Dataset Name', 'Training Dataset', 'Test Dataset'])['Model ID'].apply(list).reset_index()
-  return datasets_df
-
+  datasets_df = pd.concat([datasets_df, mapping_df[mapping_df['Model ID'].isna()][['Dataset Name', 'Training Dataset', 'Test Dataset']]], ignore_index=True)
+  return datasets_df    
+    
 def get_dataset_from_model_id(model_id, mapping_file_path = MODEL_DATASET_MAPPING):
   model_dataset_mapping =  pd.read_csv(mapping_file_path)
   model_dataset = model_dataset_mapping[model_dataset_mapping['Model ID'] == model_id]
@@ -900,21 +896,28 @@ def get_dataset_from_model_id(model_id, mapping_file_path = MODEL_DATASET_MAPPIN
 
 def get_dataset(name):
 
-    df = get_dataset_list()
+    df = _get_dataset_list()
     dataset = df[df['Dataset Name'] == name]
-  
-    if len(df) > 0:        
-        # get Dataset dataframe
-        train_url = dataset['Training Dataset'].values[0]
-        train_df = pd.read_csv(train_url)
+    
+    if len(dataset) > 0:
+      train_df = None
+      test_df = None    
+
+      # get Dataset dataframe
+      if 'Test Dataset' in dataset.columns:
         test_url = dataset['Test Dataset'].values[0]
         test_df = pd.read_csv(test_url)
-
-        # combine train_df and test_df but make a column to identify if the row is train or test
-        train_df['is_train'] = 1
         test_df['is_train'] = 0
-        data_df = pd.concat([train_df, test_df])
-        return data_df
+
+      # print(dataset['Training Dataset'])
+      if dataset['Training Dataset'].notna().any():
+        train_url = dataset['Training Dataset'].values[0]
+        train_df = pd.read_csv(train_url)
+        train_df['is_train'] = 1
+
+      # combine train_df and test_df but make a column to identify if the row is train or test  
+      data_df = pd.concat([train_df, test_df])
+      return data_df
     else:
       print(f"Dataset with name {name} not found")
       return None
