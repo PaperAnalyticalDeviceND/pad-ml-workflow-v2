@@ -751,12 +751,11 @@ def nn_predict(image_url, model_path, labels):
 
   return prediction, probability, energy.numpy()
 
-
-def predict(card_id, model_id, verbose=False):
+def predict(card_id, model_id, actual_api=None, verbose=False):
 
   pad_url = 'https://pad.crc.nd.edu/'
 
-  card_info = get_card(card_id)
+  card_df = get_card(card_id)
 
   # download model
   model_df = get_model(model_id)
@@ -776,9 +775,11 @@ def predict(card_id, model_id, verbose=False):
 
 
   # define actual label
-  actual_api = standardize_names(card_info.sample_name.values[0])
+  if actual_api is None:
+    actual_api = standardize_names(card_df.sample_name.values[0])
+
   if model_type == 'pls':
-    actual_label = card_info.quantity.values[0]
+    actual_label = card_df.quantity.values[0]
   else:
     actual_label = actual_api
 
@@ -786,7 +787,7 @@ def predict(card_id, model_id, verbose=False):
   labels = list(map(standardize_names, get_model(model_id).labels.values[0]))
 
   # fix image url
-  image_url =  pad_url + card_info.processed_file_location.values[0]
+  image_url =  pad_url + card_df.processed_file_location.values[0]
 
   # make prediction
   if model_type == 'tf_lite':
@@ -798,7 +799,6 @@ def predict(card_id, model_id, verbose=False):
     prediction = pls_conc.quantity(temp_file, actual_api) 
 
   return actual_label, prediction
-
 
 
 def show_prediction(card_id, model_id):
@@ -904,17 +904,26 @@ def apply_predictions_to_dataframe(dataset_df, model_id):
     Returns:
         pd.DataFrame: A dataframe with additional 'actual_label' and 'prediction' columns.
     """
+    # def apply_predict(row):
+    #     # Call the predict function and unpack the results
+    #     actual_label, prediction = predict(row['id'], model_id, actual_api=row['sample_name'])
+    #     return pd.Series({'id': int(row['id']), 'actual_label': actual_label, 'prediction': prediction})
+
     def apply_predict(row):
         # Call the predict function and unpack the results
-        actual_label, prediction = predict(row['id'], model_id)
-        return pd.Series({'actual_label': actual_label, 'prediction': prediction})
-
+        id = int(row['id'])
+        actual_label, prediction = predict(id, model_id, actual_api=row['sample_name'])
+        return pd.Series({
+            'id': id,
+            'label': actual_label,
+            'prediction': prediction
+        })
+        
     # Apply the prediction function to each row
     results = dataset_df.apply(apply_predict, axis=1)
+    results['id'] = results['id'].astype(int)  # Convert 'id' to integer
 
-    # Concatenate the results with the original dataframe
-    return pd.concat([dataset_df, results], axis=1)
-    
+    return results
 
 def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
   model_dataset_mapping =  pd.read_csv(mapping_file_path)
