@@ -776,11 +776,11 @@ def predict(card_id, model_id, verbose=False):
 
 
   # define actual label
-  actual_api = card_info.sample_name.values[0]
+  actual_api = standardize_names(card_info.sample_name.values[0])
   if model_type == 'pls':
     actual_label = card_info.quantity.values[0]
   else:
-    actual_label = card_info.sample_name.values[0]
+    actual_label = actual_api
 
   # fix label names
   labels = list(map(standardize_names, get_model(model_id).labels.values[0]))
