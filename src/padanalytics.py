@@ -868,21 +868,45 @@ def show_prediction(card_id, model_id):
     
 import pandas as pd
 
-def apply_predictions_to_dataframe(dataset_df, predict_function, model_id):
+# def apply_predictions_to_dataframe(dataset_df, predict_function, model_id):
+#     """
+#     Applies a prediction function to each row of a dataframe based on an 'id' column.
+
+#     Parameters:
+#         dataset_df (pd.DataFrame): The input dataframe containing an 'id' column.
+#         predict_function (function): The function to make predictions, which accepts (id, model_id) and returns (actual_label, prediction).
+#         model_id (int): The model identifier to be passed to the predict function.
+
+#     Returns:
+#         pd.DataFrame: A dataframe with additional 'actual_label' and 'prediction' columns.
+#     """
+#     def apply_predict(row):
+#         # Call the predict function and unpack the results
+#         actual_label, prediction = predict_function(row['id'], model_id)
+#         return pd.Series({'actual_label': actual_label, 'prediction': prediction})
+
+#     # Apply the prediction function to each row
+#     results = dataset_df.apply(apply_predict, axis=1)
+
+#     # Concatenate the results with the original dataframe
+#     return pd.concat([dataset_df, results], axis=1)
+
+# import pandas as pd
+
+def apply_predictions_to_dataframe(dataset_df, model_id):
     """
-    Applies a prediction function to each row of a dataframe based on an 'id' column.
+    Applies the `predict` function to each row of a dataframe based on an 'id' column.
 
     Parameters:
         dataset_df (pd.DataFrame): The input dataframe containing an 'id' column.
-        predict_function (function): The function to make predictions, which accepts (id, model_id) and returns (actual_label, prediction).
-        model_id (int): The model identifier to be passed to the predict function.
+        model_id (int): The model identifier to be passed to the `predict` function.
 
     Returns:
         pd.DataFrame: A dataframe with additional 'actual_label' and 'prediction' columns.
     """
     def apply_predict(row):
         # Call the predict function and unpack the results
-        actual_label, prediction = predict_function(row['id'], model_id)
+        actual_label, prediction = predict(row['id'], model_id)
         return pd.Series({'actual_label': actual_label, 'prediction': prediction})
 
     # Apply the prediction function to each row
@@ -890,7 +914,6 @@ def apply_predictions_to_dataframe(dataset_df, predict_function, model_id):
 
     # Concatenate the results with the original dataframe
     return pd.concat([dataset_df, results], axis=1)
-
     
 
 def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
