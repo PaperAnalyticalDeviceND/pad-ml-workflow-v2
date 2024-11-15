@@ -752,8 +752,6 @@ def nn_predict(image_url, model_path, labels):
   return prediction, probability, energy.numpy()
 
 
-
-
 def predict(card_id, model_id, verbose=False):
 
   pad_url = 'https://pad.crc.nd.edu/'
@@ -867,6 +865,33 @@ def show_prediction(card_id, model_id):
 
     # Display the widget
     display(image_widget_box)
+    
+import pandas as pd
+
+def apply_predictions_to_dataframe(dataset_df, predict_function, model_id):
+    """
+    Applies a prediction function to each row of a dataframe based on an 'id' column.
+
+    Parameters:
+        dataset_df (pd.DataFrame): The input dataframe containing an 'id' column.
+        predict_function (function): The function to make predictions, which accepts (id, model_id) and returns (actual_label, prediction).
+        model_id (int): The model identifier to be passed to the predict function.
+
+    Returns:
+        pd.DataFrame: A dataframe with additional 'actual_label' and 'prediction' columns.
+    """
+    def apply_predict(row):
+        # Call the predict function and unpack the results
+        actual_label, prediction = predict_function(row['id'], model_id)
+        return pd.Series({'actual_label': actual_label, 'prediction': prediction})
+
+    # Apply the prediction function to each row
+    results = dataset_df.apply(apply_predict, axis=1)
+
+    # Concatenate the results with the original dataframe
+    return pd.concat([dataset_df, results], axis=1)
+
+    
 
 def get_model_dataset_mapping(mapping_file_path = MODEL_DATASET_MAPPING):
   model_dataset_mapping =  pd.read_csv(mapping_file_path)
