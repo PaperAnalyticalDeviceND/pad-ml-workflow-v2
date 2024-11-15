@@ -754,7 +754,7 @@ def nn_predict(image_url, model_path, labels):
 
 
 
-def predict(card_id, model_id):
+def predict(card_id, model_id, verbose=False):
 
   pad_url = 'https://pad.crc.nd.edu/'
 
@@ -765,9 +765,11 @@ def predict(card_id, model_id):
   model_type = model_df.type.values[0]
   model_url = model_df.weights_url.values[0]
   model_file = os.path.basename(model_url)
-  print(f"Model Type: {model_type}")
-  print(f"Model URL: {model_url}")
-  print(f"Model File: {model_file}")
+  if verbose:
+    print(f"Model Type: {model_type}")
+    print(f"Model URL: {model_url}")
+    print(f"Model File: {model_file}")
+    
   if not os.path.exists(model_file):
     if pad_helper.pad_download(model_url):
         print(model_url, "downloaded.")
