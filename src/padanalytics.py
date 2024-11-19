@@ -7,6 +7,7 @@ from io import BytesIO
 import io
 import pandas as pd
 import tensorflow as tf
+from sklearn.metrics import mean_squared_error
 
 import regionRoutine
 import pad_helper
@@ -913,11 +914,24 @@ def apply_predictions_to_dataframe(dataset_df, model_id):
         # Call the predict function and unpack the results
         id = int(row['id'])
         actual_label, prediction = predict(id, model_id, actual_api=row['sample_name'])
-        return pd.Series({
-            'id': id,
-            'label': actual_label,
-            'prediction': prediction
-        })
+
+        # 
+        if isinstance(prediction, float):
+          return pd.Series({
+              'id': id,
+              'label': actual_label,
+              'prediction': prediction
+          })          
+        
+        # assumes the first value is the prediction      
+        if isinstance(prediction, tuple) and len(prediction) == 3:            
+            return pd.Series({
+                'id': id,
+                'label': actual_label,
+                'prediction': prediction[0],
+                'confidence': prediction[1]                
+            })          
+        
         
     # Apply the prediction function to each row
     results = dataset_df.apply(apply_predict, axis=1)
@@ -983,3 +997,16 @@ def get_dataset(name):
     else:
       print(f"Dataset with name {name} not found")
       return None
+
+def calculate_rmse(group, pred_col='prediction', actual_col='label'):
+    actual = group[actual_col].astype(int)
+    predicted = group[pred_col].astype(int)
+    return np.sqrt(np.mean((actual - predicted) ** 2))
+
+def calculate_rmse_by_api(result, actual_col='label', pred_col='prediction'):
+    # Grouping by 'sample_name' and applying the RMSE calculation
+    rmse_by_class = result.groupby('sample_name').apply(calculate_rmse, include_groups=False )
+    
+    # Convert the Series to a DataFrame and reset the index
+    rmse_df = rmse_by_class.reset_index(name='rmse')
+    return rmse_df
