@@ -774,12 +774,23 @@ def predict(card_id, model_id, actual_api=None, verbose=False):
     else:
         print(model_url, "failed to download.")
 
-
+  # label type
+  labels = model_df.labels[0]
+  try: #Predict Concentration
+    labels = list(map(int, labels))
+    labels_type = 'concentration'
+  except: # Predict API    
+    labels = list(map(standardize_names, labels))
+    labels_type = 'api'
+    
+  
+  if verbose: print("Labels: ", labels)
+    
   # define actual label
   if actual_api is None:
     actual_api = standardize_names(card_df.sample_name.values[0])
 
-  if model_type == 'pls':
+  if labels_type == 'concentration':
     actual_label = card_df.quantity.values[0]
   else:
     actual_label = actual_api
