@@ -130,7 +130,7 @@ def get_card(card_id=None, sample_id=None):
 
     elif sample_id:
         # Get card samples by sample_id
-        return get_card_samples(sample_id)
+        return get_card_by_sample_id(sample_id)
     else:
         raise ValueError("You must provide either card_id or sample_id")
 
@@ -414,43 +414,69 @@ def standardize_names(name):
     return name.lower().replace(' ', '-')
 
 # Extended function to get project cards for either a single project ID or multiple project IDs
-def get_card_samples(sample_id):
-
-    # Get project cards
-    def _get_project_cards(project_id):
-        request_url = f"{API_URL}/projects/{project_id}/cards"
-        return get_data_api(request_url, f"project {project_id} cards")
-
-    # Check a list of all available project
-    project_ids = get_projects().id.tolist()   
-
-    for project_id in project_ids:
-        # Get cards for each project
-        project_cards = _get_project_cards(project_id)
-        
-        if project_cards is not None:
-          # Filter the cards based on the sample_id
-          if 'sample_id' in project_cards.columns:
-            card_samples = project_cards[project_cards.sample_id == sample_id]
-            
-          # Assuming a sample_id can't be in multuples projects
-          if not card_samples.empty:
-            project_name = get_project(project_id).project_name.values[0]
-            # Displaying the message with custom font and color
-            display(HTML(f"""
-            <div style="font-family: 'Courier New', monospace; color: #1d81df;">
-                &#128077; One or more cards with the <strong>Sample ID {sample_id}</strong> were found in the <strong>Project {project_name} (ID={project_id})</strong>                
-            </div></br>
-            """))            
-            return card_samples
+def get_card_by_sample_id(sample_id):
+    """
+    Fetches card data for a given sample_id and returns it as a pandas DataFrame
     
-    # Displaying the message with custom font and dark red color
-    display(HTML(f"""
-    <div style="font-family: 'Courier New', monospace; color: darkred;">
-        &#128308; No data was retrieved for the provided <strong>Sample ID {sample_id}</strong>.
-    </div>
-    """))
-    return None
+    Parameters:
+    -----------
+    sample_id : int
+        The sample ID to fetch cards for
+        
+    Returns:
+    --------
+    pandas.DataFrame
+        DataFrame containing the card information with specified columns
+    """
+    
+    # Make API request
+    url = f"https://pad.crc.nd.edu/api-ld/v3/cards/by-sample/{sample_id}"
+    response = requests.get(url)
+    data = response.json()
+    
+    if not data['success']:
+        raise Exception(f"API request failed: {data['error']}")
+    
+    # Extract cards data
+    cards = data['data']
+    
+    # Process each card to flatten the nested structure
+    processed_cards = []
+    for card in cards:
+        processed_card = {
+            'id': card['id'],
+            'sample_name': card['sample_name']['name'],
+            'test_name': card['test_name']['name'],
+            'user_name': card['user_name']['name'],
+            'date_of_creation': card['date_of_creation'],
+            'raw_file_location': card['raw_file_location'],
+            'processed_file_location': card['processed_file_location'],
+            'processing_date': None,  # This field wasn't in the original data
+            'camera_type_1': card['camera_type_1'],
+            'notes': card['notes'],
+            'sample_id': card['sample_id'],
+            'quantity': card['quantity'],
+            'deleted': False,  # This field wasn't in the original data
+            'issue': card.get('issue_id'),
+            'project.id': card['project']['id'],
+            'project.user_name': None,  # This field wasn't in the project data
+            'project.project_name': card['project']['name'],
+            'project.annotation': None,  # This field wasn't in the project data
+            'project.test_name': None,  # This field wasn't in the project data
+            'project.sample_names.sample_names': None,  # This field wasn't in the project data
+            'project.neutral_filler': None,  # This field wasn't in the project data
+            'project.qpc20': None,  # This field wasn't in the project data
+            'project.qpc50': None,  # This field wasn't in the project data
+            'project.qpc80': None,  # This field wasn't in the project data
+            'project.qpc100': None,  # This field wasn't in the project data
+            'project.notes': None,  # This field wasn't in the project data
+        }
+        processed_cards.append(processed_card)
+    
+    # Create DataFrame
+    df = pd.DataFrame(processed_cards)
+    
+    return df
 
 
 def show_cards_from_df(cards_df):
